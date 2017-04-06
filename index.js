@@ -17,19 +17,26 @@ var WordVector = (function () {
     };
     return WordVector;
 }());
+var W2VConst;
+(function (W2VConst) {
+    W2VConst.defaultVectorPath = __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
+})(W2VConst || (W2VConst = {}));
 var Word2Vec = (function () {
-    function Word2Vec(opt) {
+    function Word2Vec(pathToVectors) {
+        if (pathToVectors === void 0) { pathToVectors = W2VConst.defaultVectorPath; }
         var childprocess = require("child_process");
-        //this.p = childprocess.spawn('./vecWord', ["data/jawiki-sep-1-vectors-bin1.bin"], {});
-        this.p = childprocess.spawn('./vecWord', ["data/jawiki-sep-1-vectors-bin1.bin"]);
+        this.p = childprocess.spawn(__dirname + '/vecWord', [pathToVectors]);
         var that = this;
         this.p.stdout.on('data', function (data) {
-            //console.log('stdout: ' + data);
+            if (!(that.f instanceof Function))
+                return;
             data = "" + data;
             var dataSplit = data.split("\n");
-            //console.log(dataSplit);
+            if (dataSplit.length < 3) {
+                that.f(new WordVector(-1, 0, []));
+                return;
+            }
             dataSplit[2] = dataSplit[2].split(" ");
-            //console.log(dataSplit);
             var mapF = function (element) {
                 if (element instanceof Array) {
                     return element.map(mapF);
@@ -39,13 +46,13 @@ var Word2Vec = (function () {
                 }
             };
             dataSplit = mapF(dataSplit);
-            //console.log(dataSplit);
             that.f(new WordVector(dataSplit[0], dataSplit[1], dataSplit[2]));
         });
         this.p.on('exit', function (code) {
             console.log('child process exited.');
         });
         this.p.on('error', function (err) {
+            console.error("Error in Word2Vec process");
             console.error(err);
             process.exit(1);
         });
