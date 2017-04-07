@@ -22,16 +22,13 @@ class WordVector
 	}
 }
 
-
-
-
 namespace W2VConst
 {
+	export const binPathGetVector
+		= __dirname + "/vecWord";
 	export const defaultVectorPath
 		= __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
 }
-
-
 
 class Word2Vec
 {
@@ -39,7 +36,7 @@ class Word2Vec
 	f: Function;
 	constructor(pathToVectors: string = W2VConst.defaultVectorPath){
 		var childprocess = require("child_process");
-		this.p = childprocess.spawn(__dirname + '/vecWord', [pathToVectors]);
+		this.p = childprocess.spawn(W2VConst.binPathGetVector, [pathToVectors]);
 		var that = this;
 		this.p.stdout.on('data', function(data){
 			if(!(that.f instanceof Function)) return;
@@ -102,6 +99,5 @@ class Word2Vec
 		});
 	}
 }
-
 
 module.exports = Word2Vec;

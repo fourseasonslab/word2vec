@@ -19,13 +19,14 @@ var WordVector = (function () {
 }());
 var W2VConst;
 (function (W2VConst) {
+    W2VConst.binPathGetVector = __dirname + "/vecWord";
     W2VConst.defaultVectorPath = __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
 })(W2VConst || (W2VConst = {}));
 var Word2Vec = (function () {
     function Word2Vec(pathToVectors) {
         if (pathToVectors === void 0) { pathToVectors = W2VConst.defaultVectorPath; }
         var childprocess = require("child_process");
-        this.p = childprocess.spawn(__dirname + '/vecWord', [pathToVectors]);
+        this.p = childprocess.spawn(W2VConst.binPathGetVector, [pathToVectors]);
         var that = this;
         this.p.stdout.on('data', function (data) {
             if (!(that.f instanceof Function))
