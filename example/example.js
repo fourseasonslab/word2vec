@@ -5,3 +5,6 @@ w2v.getVector("陽子", function(v1){
 		console.log(v1.cosineSimilarity(v2));
 	});
 });
+w2v.twoWordSimilarity("陽子", "明子", function(r){
+	console.log(r);
+})

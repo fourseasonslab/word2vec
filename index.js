@@ -1,5 +1,6 @@
 var WordVector = (function () {
-    function WordVector(index, dimention, vector) {
+    function WordVector(word, index, dimention, vector) {
+        this.word = word;
         this.index = index;
         this.dimention = dimention;
         this.vector = vector;
@@ -17,37 +18,47 @@ var WordVector = (function () {
     };
     return WordVector;
 }());
+var Word2VecRequest = (function () {
+    function Word2VecRequest(word, func) {
+        this.word = word;
+        this.func = func;
+    }
+    return Word2VecRequest;
+}());
 var W2VConst;
 (function (W2VConst) {
-    W2VConst.binPathGetVector = __dirname + "/vecWord";
+    W2VConst.binPathGetVector = __dirname + "/get-vector";
     W2VConst.defaultVectorPath = __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
 })(W2VConst || (W2VConst = {}));
 var Word2Vec = (function () {
     function Word2Vec(pathToVectors) {
         if (pathToVectors === void 0) { pathToVectors = W2VConst.defaultVectorPath; }
+        this.buf = [];
+        this.reqList = [];
         var childprocess = require("child_process");
         this.p = childprocess.spawn(W2VConst.binPathGetVector, [pathToVectors]);
         var that = this;
         this.p.stdout.on('data', function (data) {
-            if (!(that.f instanceof Function))
-                return;
             data = "" + data;
-            var dataSplit = data.split("\n");
-            if (dataSplit.length < 3) {
-                that.f(new WordVector(-1, 0, []));
-                return;
+            data = data.split("\n");
+            data.pop(); // remove last newline
+            Array.prototype.push.apply(that.buf, data); // append all
+            //console.log(that.buf);
+            while (that.buf.length !== 0) {
+                var req = that.reqList.shift();
+                var idx = Number(that.buf.shift());
+                var dim = 0;
+                var vec = [];
+                if (idx !== -1 && !isNaN(idx)) {
+                    dim = Number(that.buf.shift());
+                    vec = that.buf.shift().split(" ").map(function (e) {
+                        return Number(e);
+                    });
+                }
+                if (req && req.func instanceof Function) {
+                    req.func(new WordVector(req.word, idx, dim, vec));
+                }
             }
-            dataSplit[2] = dataSplit[2].split(" ");
-            var mapF = function (element) {
-                if (element instanceof Array) {
-                    return element.map(mapF);
-                }
-                else {
-                    return Number(element);
-                }
-            };
-            dataSplit = mapF(dataSplit);
-            that.f(new WordVector(dataSplit[0], dataSplit[1], dataSplit[2]));
         });
         this.p.on('exit', function (code) {
             console.log('child process exited.');
@@ -59,7 +70,7 @@ var Word2Vec = (function () {
         });
     }
     Word2Vec.prototype.getVector = function (s, f) {
-        this.f = f;
+        this.reqList.push(new Word2VecRequest(s, f));
         this.p.stdin.write(s + "\n");
     };
     Word2Vec.prototype.cosineSimilarity = function (a, b) {
@@ -74,12 +85,10 @@ var Word2Vec = (function () {
         return ans;
     };
     Word2Vec.prototype.twoWordSimilarity = function (a, b, f) {
-        this.f = f;
-        var w2v = new Word2Vec();
-        w2v.getVector(a, function (splited) {
-            var asplited = splited;
-            w2v.getVector(b, function (splited) {
-                console.log(w2v.cosineSimilarity(asplited, splited));
+        var that = this;
+        this.getVector(a, function (v1) {
+            that.getVector(b, function (v2) {
+                f(v1.cosineSimilarity(v2));
             });
         });
     };

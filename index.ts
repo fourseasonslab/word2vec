@@ -1,10 +1,12 @@
 class WordVector
 {
+	word: string;
 	index : number;
 	dimention : number;
 	vector : number[];
 
-	constructor(index: number, dimention: number, vector: number[]){
+	constructor(word: string, index: number, dimention: number, vector: number[]){
+		this.word = word;
 		this.index = index;
 		this.dimention = dimention;
 		this.vector = vector;
@@ -22,10 +24,20 @@ class WordVector
 	}
 }
 
+class Word2VecRequest
+{
+	word: string;
+	func: Function;
+	constructor(word: string, func: Function){
+		this.word = word;
+		this.func = func;
+	}
+}
+
 namespace W2VConst
 {
 	export const binPathGetVector
-		= __dirname + "/vecWord";
+		= __dirname + "/get-vector";
 	export const defaultVectorPath
 		= __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
 }
@@ -33,33 +45,33 @@ namespace W2VConst
 class Word2Vec
 {
 	p: any;  
-	f: Function;
+	buf: string[] = [];
+	reqList: Word2VecRequest[] = [];
 	constructor(pathToVectors: string = W2VConst.defaultVectorPath){
 		var childprocess = require("child_process");
 		this.p = childprocess.spawn(W2VConst.binPathGetVector, [pathToVectors]);
 		var that = this;
 		this.p.stdout.on('data', function(data){
-			if(!(that.f instanceof Function)) return;
-
 			data = "" + data;
-
-			var dataSplit = data.split("\n");
-			if(dataSplit.length < 3){
-				that.f(new WordVector(-1, 0, []));
-				return;
-			}
-			dataSplit[2] = dataSplit[2].split(" ");
-			var mapF = function (element) {
-				if(element instanceof Array){
-					return element.map(mapF);
-				}else{
-					return Number(element);
+			data = data.split("\n");
+			data.pop();	// remove last newline
+			Array.prototype.push.apply(that.buf, data);	// append all
+			//console.log(that.buf);
+			while(that.buf.length !== 0){
+				var req = that.reqList.shift();
+				var idx = Number(that.buf.shift());
+				var dim = 0;
+				var vec = [];
+				if(idx !== -1 && !isNaN(idx)){
+					dim = Number(that.buf.shift());
+					vec = that.buf.shift().split(" ").map(function(e){
+						return Number(e);
+					});
+				}
+				if(req && req.func instanceof Function){
+					req.func(new WordVector(req.word, idx, dim, vec));
 				}
 			}
-			dataSplit = mapF(dataSplit);
-			
-			that.f(new WordVector(dataSplit[0],dataSplit[1],dataSplit[2]));
-
 		});
 		this.p.on('exit', function (code) {
 			console.log('child process exited.');
@@ -72,7 +84,7 @@ class Word2Vec
 	}
 
 	getVector(s: string, f: Function){
-		this.f = f;
+		this.reqList.push(new Word2VecRequest(s, f));
 		this.p.stdin.write(s + "\n");
 	}
 
@@ -88,13 +100,10 @@ class Word2Vec
 	}
 
 	twoWordSimilarity(a : string, b : string, f : Function){
-		this.f = f;
-		var w2v = new Word2Vec();
-		w2v.getVector(a, function(splited : WordVector){
-			var asplited = splited;
-
-			w2v.getVector(b, function(splited : WordVector){
-				console.log(w2v.cosineSimilarity(asplited, splited));
+		var that = this;
+		this.getVector(a, function(v1 : WordVector){
+			that.getVector(b, function(v2 : WordVector){
+				f(v1.cosineSimilarity(v2));
 			});
 		});
 	}
