@@ -22,22 +22,46 @@ class WordVector
 		}
 		return ans;
 	}
+	add(b: WordVector){
+		if(this.index === -1 || b.index === -1) return null;
+		if(this.dimention !== b.dimention) return null;
+
+		var vec = [];
+		for(var i=0; i<this.dimention; i++){
+			vec[i] = this.vector[i] + b.vector[i];
+		}
+		
+		return new WordVector(null, null, this.dimention, vec);
+	}
+	reverse(){
+		if(this.index === -1) return null;
+
+		var vec = [];
+		for(var i=0; i<this.dimention; i++){
+			vec[i] = -this.vector[i];
+		}
+		
+		return new WordVector(null, null, this.dimention, vec);
+	}
+
 }
 
 class Word2VecRequest
 {
 	word: string;
 	func: Function;
-	constructor(word: string, func: Function){
+	qType: string;
+	constructor(word: string, func: Function, qType: string){
 		this.word = word;
 		this.func = func;
+		this.qType = qType;
 	}
 }
 
 namespace W2VConst
 {
-	export const binPathGetVector
-		= __dirname + "/get-vector";
+	export const binPath
+		= __dirname + "/node-word2vec";
 	export const defaultVectorPath
 		= __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
 }
@@ -49,7 +73,7 @@ class Word2Vec
 	reqList: Word2VecRequest[] = [];
 	constructor(pathToVectors: string = W2VConst.defaultVectorPath){
 		var childprocess = require("child_process");
-		this.p = childprocess.spawn(W2VConst.binPathGetVector, [pathToVectors]);
+		this.p = childprocess.spawn(W2VConst.binPath, [pathToVectors]);
 		var that = this;
 		this.p.stdout.on('data', function(data){
 			data = "" + data;
@@ -59,17 +83,30 @@ class Word2Vec
 			//console.log(that.buf);
 			while(that.buf.length !== 0){
 				var req = that.reqList.shift();
-				var idx = Number(that.buf.shift());
-				var dim = 0;
-				var vec = [];
-				if(idx !== -1 && !isNaN(idx)){
-					dim = Number(that.buf.shift());
-					vec = that.buf.shift().split(" ").map(function(e){
-						return Number(e);
-					});
-				}
-				if(req && req.func instanceof Function){
-					req.func(new WordVector(req.word, idx, dim, vec));
+				if(req.qType === "word2vec"){
+					var idx = Number(that.buf.shift());
+					var dim = 0;
+					var vec = [];
+					if(idx !== -1 && !isNaN(idx)){
+						dim = Number(that.buf.shift());
+						vec = that.buf.shift().split(" ").map(function(e){
+							return Number(e);
+						});
+					}
+					if(req && req.func instanceof Function){
+						req.func(new WordVector(req.word, idx, dim, vec));
+					}
+				} else if(req.qType === "vec2word"){
+					if(req && req.func instanceof Function){
+						req.func(that.buf.map(function(e){
+							var t = e.split("\t");
+							var r = [];
+							r[0] = t[0];
+							if(t[1]) r[1] = Number(t[1]);
+							return r;
+						}));
+					}
+					that.buf = [];
 				}
 			}
 		});
@@ -84,8 +121,17 @@ class Word2Vec
 	}
 
 	getVector(s: string, f: Function){
-		this.reqList.push(new Word2VecRequest(s, f));
-		this.p.stdin.write(s + "\n");
+		this.reqList.push(new Word2VecRequest(s, f, "word2vec"));
+		this.p.stdin.write("word2vec\n" + s + "\n");
+	}
+
+	getSimilarWordList(v: WordVector, count: number, f: Function){
+		if(v && v.vector && v.vector.length > 0){
+		this.reqList.push(new Word2VecRequest(null, f, "vec2word"));
+			this.p.stdin.write("vec2word\n" + count + " " + v.vector.join(" ") + "\n");
+		} else{
+			f([]);
+		}
 	}
 
 	cosineSimilarity(a : WordVector, b : WordVector){
