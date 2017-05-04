@@ -1,4 +1,4 @@
-var Word2Vec = require("node-word2vec");
+var Word2Vec = require("../");
 var w2v = new Word2Vec(__dirname + "/jawiki-sep-1-vectors-bin1.bin");
 w2v.getVector("りんご", function(vApple){
 	w2v.getVector("赤", function(vRed){
