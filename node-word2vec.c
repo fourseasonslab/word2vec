@@ -3,21 +3,22 @@
 #include <string.h>
 #include <math.h>
 
-const long long max_size = 2000;         // max length of strings
-const long long N = 40;                  // number of closest words that will be shown
-const long long max_w = 50;              // max length of vocabulary entries
+#define MAX_WORD_STR_LEN 	2000	// max length of strings
+#define MAX_CLOSEST_WORDS	40		// number of closest words that will be shown
+#define MAX_VOCAB			59		// max length of vocabulary entries
+
 float *M;
 char *vocab;
 long long words, size;
-char *bestw[N];
+char *bestw[MAX_CLOSEST_WORDS];
 
 void word2vec()
 {
 	long long a, b;
-	char s[max_size], word[max_size];
+	char s[MAX_WORD_STR_LEN], word[MAX_WORD_STR_LEN];
 	if(!fgets(s, sizeof(s), stdin)) return;
 	sscanf(s, "%s", word);
-	for (b = 0; b < words; b++) if (!strcmp(&vocab[b * max_w], word)) break;
+	for (b = 0; b < words; b++) if (!strcmp(&vocab[b * MAX_VOCAB], word)) break;
 	if (b == words) b = -1;
 	printf("%lld\n", b);
 	if (b != -1){
@@ -33,14 +34,14 @@ void word2vec()
 void vec2word()
 {
 	long long a, b, n, c, d;
-	float dist, len, bestd[N], vec[max_size];
+	float dist, len, bestd[MAX_CLOSEST_WORDS], vec[MAX_WORD_STR_LEN];
 	double tf;
 	long long cn, bi[100];
-	for (a = 0; a < N; a++) bestd[a] = 0;
-	for (a = 0; a < N; a++) bestw[a][0] = 0;
+	for (a = 0; a < MAX_CLOSEST_WORDS; a++) bestd[a] = 0;
+	for (a = 0; a < MAX_CLOSEST_WORDS; a++) bestw[a][0] = 0;
 	a = 0;
 	if(scanf("%lld", &n) != 1) return; //word count to get
-	if(n <= 0 || N < n) n = N;
+	if(n <= 0 || MAX_CLOSEST_WORDS < n) n = MAX_CLOSEST_WORDS;
 	//
 	cn = 0;
 	for(a = 0; a < size; a++){
@@ -71,7 +72,7 @@ void vec2word()
 					strcpy(bestw[d], bestw[d - 1]);
 				}
 				bestd[a] = dist;
-				strcpy(bestw[a], &vocab[c * max_w]);
+				strcpy(bestw[a], &vocab[c * MAX_VOCAB]);
 				break;
 			}
 		}
@@ -84,8 +85,8 @@ void vec2word()
 
 int main(int argc, char **argv) {
 	FILE *f;
-	char s[max_size];
-	char file_name[max_size];
+	char s[MAX_WORD_STR_LEN];
+	char file_name[MAX_WORD_STR_LEN];
 	float len;
 	long long a, b;
 	if (argc < 2) {
@@ -103,8 +104,8 @@ int main(int argc, char **argv) {
 	}
 	fscanf(f, "%lld", &words);
 	fscanf(f, "%lld", &size);
-	vocab = (char *)malloc((long long)words * max_w * sizeof(char));
-	for (a = 0; a < N; a++) bestw[a] = (char *)malloc(max_size * sizeof(char));
+	vocab = (char *)malloc((long long)words * MAX_VOCAB * sizeof(char));
+	for (a = 0; a < MAX_CLOSEST_WORDS; a++) bestw[a] = (char *)malloc(MAX_WORD_STR_LEN * sizeof(char));
 
 	fflush(stdout);
 
@@ -117,11 +118,11 @@ int main(int argc, char **argv) {
 	for (b = 0; b < words; b++) {
 		a = 0;
 		while (1) {
-			vocab[b * max_w + a] = fgetc(f);
-			if (feof(f) || (vocab[b * max_w + a] == ' ')) break;
-			if ((a < max_w) && (vocab[b * max_w + a] != '\n')) a++;
+			vocab[b * MAX_VOCAB + a] = fgetc(f);
+			if (feof(f) || (vocab[b * MAX_VOCAB + a] == ' ')) break;
+			if ((a < MAX_VOCAB) && (vocab[b * MAX_VOCAB + a] != '\n')) a++;
 		}
-		vocab[b * max_w + a] = 0;
+		vocab[b * MAX_VOCAB + a] = 0;
 		for (a = 0; a < size; a++) fread(&M[a + b * size], sizeof(float), 1, f);
 		len = 0;
 		for (a = 0; a < size; a++) len += M[a + b * size] * M[a + b * size];
