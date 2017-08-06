@@ -1,28 +1,29 @@
 CC = gcc
 #Using -Ofast instead of -O3 might result in faster code, but is supported only by newer GCC versions
-CFLAGS = -lm -pthread -O3 -march=native -Wall -funroll-loops -Wno-unused-result
+CFLAGS = -pthread -O3 -march=native -Wall -funroll-loops -Wno-unused-result
+LDFLAGS = -Wl,--no-as-needed -lm
 
 TARGETS = word2vec word2phrase distance word-analogy compute-accuracy node-word2vec
 
 all: $(TARGETS)
 
 word2vec : word2vec.c
-	$(CC) word2vec.c -o word2vec $(CFLAGS)
+	$(CC) $(LDFLAGS) word2vec.c -o word2vec $(CFLAGS)
 word2phrase : word2phrase.c
-	$(CC) word2phrase.c -o word2phrase $(CFLAGS)
+	$(CC) $(LDFLAGS) word2phrase.c -o word2phrase $(CFLAGS)
 distance : distance.c
-	$(CC) distance.c -o distance $(CFLAGS)
+	$(CC) $(LDFLAGS) distance.c -o distance $(CFLAGS)
 word-analogy : word-analogy.c
-	$(CC) word-analogy.c -o word-analogy $(CFLAGS)
+	$(CC) $(LDFLAGS) word-analogy.c -o word-analogy $(CFLAGS)
 compute-accuracy : compute-accuracy.c
-	$(CC) compute-accuracy.c -o compute-accuracy $(CFLAGS)
+	$(CC) $(LDFLAGS) compute-accuracy.c -o compute-accuracy $(CFLAGS)
 	chmod +x *.sh
 
 get-vector : get-vector.c 
-	$(CC) get-vector.c -o get-vector $(CFLAGS)
+	$(CC) $(LDFLAGS) get-vector.c -o get-vector $(CFLAGS)
 
 vec2word : vec2word.c 
-	$(CC) vec2word.c -o vec2word $(CFLAGS)
+	$(CC) $(LDFLAGS) vec2word.c -o vec2word $(CFLAGS)
 
 clean:
 	rm -rf $(TARGETS)
