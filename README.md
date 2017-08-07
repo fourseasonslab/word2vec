@@ -1,4 +1,7 @@
 # node-word2vec
+
+[![npm version](https://badge.fury.io/js/node-word2vec.svg)](https://badge.fury.io/js/node-word2vec)
+
 A npm package of [word2vec](https://code.google.com/archive/p/word2vec/).
 
 ## Installation
