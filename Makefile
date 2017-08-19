@@ -1,7 +1,14 @@
 CC = gcc
 #Using -Ofast instead of -O3 might result in faster code, but is supported only by newer GCC versions
 CFLAGS = -pthread -O3 -march=native -Wall -funroll-loops -Wno-unused-result
+
+ifeq ($(OS),Windows_NT)
+# for Windows(MinGW)
 LDFLAGS = -Wl,--no-as-needed -lm
+else
+# for Unix like systems
+LDFLAGS = -lm
+endif
 
 TARGETS = word2vec word2phrase distance word-analogy compute-accuracy node-word2vec
 

@@ -13,6 +13,7 @@ w2v.getVector("りんご", function(vApple){
 			//console.log("10 " + v.vector.join(" "));
 			w2v.getSimilarWordList(v, 10, function(wl){
 				console.log(wl);
+				process.exit();
 			})
 		});
 	});
