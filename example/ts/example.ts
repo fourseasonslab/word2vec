@@ -1,4 +1,4 @@
-import { Word2Vec } from "../";
+import { Word2Vec } from "../../";
 
 var w2v = new Word2Vec(__dirname + "/jawiki-sep-1-vectors-bin1.bin");
 w2v.getVector("りんご", function(vApple){

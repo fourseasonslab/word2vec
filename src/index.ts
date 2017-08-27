@@ -1,3 +1,5 @@
+var fs = require("fs");
+
 export class WordVector
 {
 	word: string;
@@ -73,6 +75,8 @@ export class Word2Vec
 	private reqList: Word2VecRequest[] = [];
 	constructor(pathToVectors: string = W2VConst.defaultVectorPath){
 		var childprocess = require("child_process");
+		fs.accessSync(W2VConst.binPath);
+		fs.accessSync(pathToVectors);
 		this.p = childprocess.spawn(W2VConst.binPath, [pathToVectors]);
 		var that = this;
 		this.p.stdout.on('data', function(data: any){
@@ -111,10 +115,20 @@ export class Word2Vec
 			}
 		});
 		this.p.on('exit', function (code: any) {
-			console.log('child process exited.');
+			console.error('child process exited.');
 		});
 		this.p.on('error', function (err: any) {
-			console.error("Error in Word2Vec process");
+			console.error("Error in Word2Vec process(p.onError)");
+			console.error(err);
+			process.exit(1);
+		});
+		this.p.stdin.on('error', function (err: any) {
+			console.error("Error in Word2Vec process(p.stdin.onError)");
+			console.error(err);
+			process.exit(1);
+		});
+		this.p.stdout.on('error', function (err: any) {
+			console.error("Error in Word2Vec process(p.stdout.onError)");
 			console.error(err);
 			process.exit(1);
 		});

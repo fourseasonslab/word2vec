@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-var _1 = require("../");
+var _1 = require("../../");
 var w2v = new _1.Word2Vec(__dirname + "/jawiki-sep-1-vectors-bin1.bin");
 w2v.getVector("りんご", function (vApple) {
     w2v.getVector("赤", function (vRed) {
