@@ -48,7 +48,7 @@ var Word2VecRequest = (function () {
 }());
 var W2VConst;
 (function (W2VConst) {
-    W2VConst.binPath = __dirname + "/node-word2vec";
+    W2VConst.binPath = __dirname + "/bin/node-word2vec";
     W2VConst.defaultVectorPath = __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
 })(W2VConst || (W2VConst = {}));
 var Word2Vec = (function () {

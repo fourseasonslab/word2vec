@@ -61,7 +61,7 @@ class Word2VecRequest
 namespace W2VConst
 {
 	export const binPath
-		= __dirname + "/node-word2vec";
+		= __dirname + "/bin/node-word2vec";
 	export const defaultVectorPath
 		= __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
 }
