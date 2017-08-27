@@ -1,6 +1,6 @@
 {
   "name": "node-word2vec",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "word2vec interface for node.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
