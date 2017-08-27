@@ -1,0 +1,10 @@
+{
+	"compilerOptions": {
+		"module": "commonjs",
+		"target": "es5",
+		"outDir": "./",
+		"declaration": false,
+		"noImplicitAny": true
+	},
+	"files": ["example.ts"]
+}

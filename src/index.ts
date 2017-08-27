@@ -1,4 +1,4 @@
-class WordVector
+export class WordVector
 {
 	word: string;
 	index : number;
@@ -61,21 +61,21 @@ class Word2VecRequest
 namespace W2VConst
 {
 	export const binPath
-		= __dirname + "/bin/node-word2vec";
+		= __dirname + "/../bin/node-word2vec";
 	export const defaultVectorPath
-		= __dirname + "/data/jawiki-sep-1-vectors-bin1.bin";
+		= __dirname + "/../data/jawiki-sep-1-vectors-bin1.bin";
 }
 
-class Word2Vec
+export class Word2Vec
 {
 	p: any;  
 	buf: string[] = [];
-	reqList: Word2VecRequest[] = [];
+	private reqList: Word2VecRequest[] = [];
 	constructor(pathToVectors: string = W2VConst.defaultVectorPath){
 		var childprocess = require("child_process");
 		this.p = childprocess.spawn(W2VConst.binPath, [pathToVectors]);
 		var that = this;
-		this.p.stdout.on('data', function(data){
+		this.p.stdout.on('data', function(data: any){
 			data = "" + data;
 			data = data.split("\n");
 			data.pop();	// remove last newline
@@ -86,7 +86,7 @@ class Word2Vec
 				if(req.qType === "word2vec"){
 					var idx = Number(that.buf.shift());
 					var dim = 0;
-					var vec = [];
+					var vec: number[] = [];
 					if(idx !== -1 && !isNaN(idx)){
 						dim = Number(that.buf.shift());
 						vec = that.buf.shift().split(" ").map(function(e){
@@ -110,24 +110,24 @@ class Word2Vec
 				}
 			}
 		});
-		this.p.on('exit', function (code) {
+		this.p.on('exit', function (code: any) {
 			console.log('child process exited.');
 		});
-		this.p.on('error', function (err) {
+		this.p.on('error', function (err: any) {
 			console.error("Error in Word2Vec process");
 			console.error(err);
 			process.exit(1);
 		});
 	}
 
-	getVector(s: string, f: Function){
+	getVector(s: string, f: (v: WordVector) => any){
 		this.reqList.push(new Word2VecRequest(s, f, "word2vec"));
 		this.p.stdin.write("word2vec\n" + s + "\n");
 	}
 
-	getSimilarWordList(v: WordVector, count: number, f: Function){
+	getSimilarWordList(v: WordVector, count: number, f: (wl: (string | number)[]) => any){
 		if(v && v.vector && v.vector.length > 0){
-		this.reqList.push(new Word2VecRequest(null, f, "vec2word"));
+			this.reqList.push(new Word2VecRequest(null, f, "vec2word"));
 			this.p.stdin.write("vec2word\n" + count + " " + v.vector.join(" ") + "\n");
 		} else{
 			f([]);
@@ -155,4 +155,3 @@ class Word2Vec
 	}
 }
 
-module.exports = Word2Vec;

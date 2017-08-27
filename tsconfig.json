@@ -3,7 +3,9 @@
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"target": "es5",
-		"outDir": "./"
+		"outDir": "./lib/",
+		"declaration": true,
+		"noImplicitAny": true
 	},
 	"files": ["src/index.ts"]
 }
