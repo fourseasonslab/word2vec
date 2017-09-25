@@ -1,12 +1,12 @@
 {
   "name": "node-word2vec",
-  "version": "0.0.7",
+  "version": "0.0.8",
   "description": "word2vec interface for node.js",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-	"postinstall": "make bin"
+    "postinstall": "make bin"
   },
   "repository": {
     "type": "git",
@@ -22,5 +22,8 @@
   "bugs": {
     "url": "https://github.com/fourseasonslab/word2vec/issues"
   },
-  "homepage": "https://github.com/fourseasonslab/word2vec#readme"
+  "homepage": "https://github.com/fourseasonslab/word2vec#readme",
+  "dependencies": {
+    "@types/node": "^8.0.30"
+  }
 }

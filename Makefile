@@ -2,11 +2,13 @@ CC = gcc
 #Using -Ofast instead of -O3 might result in faster code, but is supported only by newer GCC versions
 CFLAGS = -pthread -O3 -march=native -Wall -funroll-loops -Wno-unused-result
 
-ifeq ($(OS),Windows_NT)
-# for Windows(MinGW)
+OS=$(shell lsb_release -si)
+
+ifeq ($(OS),Ubuntu)
+# for Ubuntu
 LDFLAGS = -Wl,--no-as-needed -lm
 else
-# for Unix like systems
+# for others
 LDFLAGS = -lm
 endif
 
